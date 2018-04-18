@@ -7,8 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <WindowsAzureMessaging/WindowsAzureMessaging.h>
+#import <UserNotifications/UserNotifications.h>
+#import "HubInfo.h"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 

@@ -16,8 +16,49 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+    UNUserNotificationCenter  *center = [UNUserNotificationCenter currentNotificationCenter];
+    UNAuthorizationOptions options = UNAuthorizationOptionBadge + UNAuthorizationOptionAlert + UNAuthorizationOptionSound;
+    
+    [center requestAuthorizationWithOptions:options
+          completionHandler:^(BOOL granted, NSError * _Nullable error) {
+              if (!granted) {
+                  NSLog(@"Something went wrong");
+              }
+          }];
+    
+    [[UIApplication sharedApplication] registerForRemoteNotifications];
     return YES;
+}
+
+
+- (void)application:(UIApplication *) application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *) deviceToken {
+    SBNotificationHub *hub = [[SBNotificationHub alloc] initWithConnectionString:HUBLISTENACCESS
+                                                             notificationHubPath:HUBNAME];
+    
+    [hub registerNativeWithDeviceToken:deviceToken tags:nil completion:^(NSError *error) {
+        if (error != nil) {
+            NSLog(@"Error registering for notifications: %@", error);
+        }
+        else {
+            [self MessageBox:@"Registration Status" message:@"Registered"];
+        }
+    }];
+}
+
+-(void)MessageBox:(NSString *) title message:(NSString *)messageText
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:messageText  preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *defaultaction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {}];
+    
+    [alert addAction:defaultaction];
+    [self.window.rootViewController presentViewController:alert animated:YES completion:nil];
+}
+
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(nonnull NSDictionary *)userInfo fetchCompletionHandler:(nonnull void (^)(UIBackgroundFetchResult))completionHandler
+{
+    NSLog(@"%@", userInfo);
+    [self MessageBox:@"Notification" message:[[userInfo objectForKey:@"aps"] valueForKey:@"alert"]];
 }
 
 
